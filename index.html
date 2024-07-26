@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RD Commission Calculator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+        .container h1 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            flex: 1;
+            padding: 12px 0;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .clear-button {
+            background-color: #dc3545;
+        }
+        .clear-button:hover {
+            background-color: #c82333;
+        }
+        .result {
+            margin-top: 20px;
+            background-color: #e9f7ef;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #d4edda;
+            text-align: left;
+            font-size: 16px;
+            color: #155724;
+        }
+        .result p {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #d4edda;
+            border-radius: 5px;
+        }
+        .result p span {
+            font-weight: bold;
+        }
+        .copied-message {
+            position: absolute;
+            top: -20px;
+            right: 10px;
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>RD Commission Calculator</h1>
+    <div class="form-group">
+        <label for="paidAmount">Paid Amount</label>
+        <input type="number" id="paidAmount" placeholder="Enter paid amount" oninput="calculateCommission()">
+    </div>
+    <div class="button-group">
+        <button class="clear-button" id="clearButton" onclick="clearFields()" disabled>Clear</button>
+        <button id="copyButton" onclick="copyResult()" disabled>Copy Result</button>
+    </div>
+    <div class="result" id="result"></div>
+    <div class="copied-message" id="copiedMessage">Copied</div>
+</div>
+
+<script>
+    function formatNumber(num) {
+        return num.toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function calculateCommission() {
+        const paidAmount = parseFloat(document.getElementById('paidAmount').value);
+
+        if (isNaN(paidAmount) || paidAmount <= 0) {
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('clearButton').disabled = true;
+            document.getElementById('copyButton').disabled = true;
+            return;
+        }
+
+        const commission = paidAmount * 0.04;
+        const tds = commission * 0.05;
+        const netCommission = commission - tds;
+
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `
+            <p><span>Paid Amount:</span> ₹${formatNumber(paidAmount)}</p>
+            <p><span>Commission (4%):</span> ₹${formatNumber(commission)}</p>
+            <p><span>TDS (5% of Commission):</span> ₹${formatNumber(tds)}</p>
+            <p><span>Net Commission:</span> ₹${formatNumber(netCommission)}</p>
+        `;
+
+        document.getElementById('clearButton').disabled = false;
+        document.getElementById('copyButton').disabled = false;
+    }
+
+    function copyResult() {
+        const paidAmount = parseFloat(document.getElementById('paidAmount').value);
+        const commission = paidAmount * 0.04;
+        const tds = commission * 0.05;
+        const netCommission = commission - tds;
+
+        const resultText = `
+-------------------------//---------------------------------
+RD Commission
+------------------------------------------------------------
+Paid Amount:
+₹${formatNumber(paidAmount)}
+------------------------------------------------------------
+Commission (4% of Paid Amount):
+₹${formatNumber(commission)}
+------------------------------------------------------------
+TDS (5% of Commission):
+₹${formatNumber(tds)}
+------------------------------------------------------------
+Net Commission (Minus Commission & TDS):
+₹${formatNumber(netCommission)}
+-------------------------//---------------------------------
+`;
+
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = resultText;
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        try {
+            document.execCommand('copy');
+            showCopiedMessage();
+        } catch (err) {
+            alert('Failed to copy result.');
+        }
+        document.body.removeChild(tempTextArea);
+    }
+
+    function showCopiedMessage() {
+        const copiedMessage = document.getElementById('copiedMessage');
+        copiedMessage.style.display = 'block';
+        setTimeout(() => {
+            copiedMessage.style.display = 'none';
+        }, 2000);
+    }
+
+    function clearFields() {
+        document.getElementById('paidAmount').value = '';
+        document.getElementById('result').innerHTML = '';
+        document.getElementById('clearButton').disabled = true;
+        document.getElementById('copyButton').disabled = true;
+    }
+</script>
+
+</body>
+</html>
